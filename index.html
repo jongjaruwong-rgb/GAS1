@@ -1,105 +1,318 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GAS API CRUD & Drive Storage</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Cloud Data Manager | Smart Storage</title>
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif; }
+    body { background: linear-gradient(135deg, #eef2f7 0%, #d9e2ec 100%); min-height: 100vh; }
+    .glass-card { background: rgba(255,255,255,0.92); backdrop-filter: blur(0px); border-radius: 2rem; box-shadow: 0 25px 45px -12px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.05); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .glass-card:hover { box-shadow: 0 30px 50px -15px rgba(0,0,0,0.25); }
+    .modern-input { transition: all 0.2s; background-color: #f9fafb; border: 1px solid #e2e8f0; }
+    .modern-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.2); outline: none; background-color: white; }
+    .btn-gradient-primary { background: linear-gradient(100deg, #10b981, #059669); transition: all 0.2s; box-shadow: 0 4px 10px -2px rgba(16,185,129,0.3); }
+    .btn-gradient-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(16,185,129,0.4); background: linear-gradient(100deg, #059669, #047857); }
+    .btn-gradient-warning { background: linear-gradient(100deg, #f59e0b, #d97706); box-shadow: 0 4px 10px -2px rgba(245,158,11,0.3); transition: all 0.2s; }
+    .btn-gradient-warning:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -5px rgba(245,158,11,0.4); }
+    .btn-outline-neutral { background: white; border: 1px solid #cbd5e1; transition: all 0.2s; }
+    .btn-outline-neutral:hover { background: #f1f5f9; border-color: #94a3b8; transform: translateY(-1px); }
+    .item-card { transition: all 0.2s ease-in-out; border: 1px solid #eef2ff; background: white; border-radius: 1.25rem; }
+    .item-card:hover { transform: translateY(-4px); border-color: #cbdffc; box-shadow: 0 12px 20px -12px rgba(0,0,0,0.12); background-color: #fefefe; }
+    .image-preview-circle { width: 64px; height: 64px; background: #f1f5f9; border-radius: 1rem; object-fit: cover; box-shadow: 0 4px 8px rgba(0,0,0,0.05); transition: 0.2s; }
+    .badge-id { background: #f1f5f9; font-family: 'SF Mono', 'Inter monospace'; letter-spacing: 0.3px; }
+    .animate-pulse-slow { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeSlideIn 0.25s ease-out; }
+    .file-zone { border: 1px dashed #cbd5e1; background: #fafcff; border-radius: 1rem; transition: 0.2s; cursor: pointer; }
+    .file-zone:hover { border-color: #3b82f6; background: #f0f9ff; }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+  </style>
 </head>
-<body class="bg-gray-100 p-4 md:p-8">
-  <div class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
-    <h2 class="text-xl font-bold mb-4 text-blue-600">
-      Manage Data & Google 12
-    </h2>
-    <div class="space-y-3 mb-6 p-4 border rounded bg-blue-50">
-      <input id="selected_id" type="hidden" />
-      <input id="name" type="text" placeholder="Name" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-400 outline-none" />
-      <input id="detail" type="text" placeholder="Detail" class="w-full p-2 border rounded focus:ring-2 focus:ring-blue-400 outline-none" />
-      <div>
-        <label class="block text-sm font-medium text-gray-700">Upload Image:</label>
-        <input id="imageFile" type="file" accept="image/*" class="w-full p-1 text-sm border rounded bg-white mt-1" />
-        <p id="fileName" class="text-xs text-gray-500 mt-1 italic"></p>
+<body class="p-4 md:p-8 font-sans antialiased">
+
+  <div class="max-w-4xl mx-auto">
+    <!-- Header with gradient accent -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
+      <div class="flex items-center gap-3">
+        <div class="bg-gradient-to-tr from-blue-500 to-indigo-600 p-2.5 rounded-2xl shadow-md">
+          <i class="fas fa-cloud-upload-alt text-white text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-slate-800 to-slate-600 bg-clip-text text-transparent">Cloud Data<span class="text-blue-600"> Manager</span></h1>
+          <p class="text-xs text-gray-500 mt-0.5 flex items-center gap-1"><i class="fas fa-database text-[10px]"></i> GAS API · Google Drive Storage</p>
+        </div>
       </div>
-      <div class="flex gap-2 pt-2">
-        <button id="btnAdd" onclick="createData()" class="flex-1 bg-green-500 text-white py-2 rounded font-bold hover:bg-green-600 transition">Add New</button>
-        <button id="btnUpdate" onclick="updateData()" class="flex-1 bg-yellow-500 text-white py-2 rounded font-bold hidden transition">Save Changes</button>
-        <button onclick="clearForm()" class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition">Clear</button>
+      <button onclick="readData()" class="bg-white/70 backdrop-blur-sm hover:bg-white text-gray-700 px-5 py-2 rounded-xl text-sm font-medium shadow-sm border border-gray-200 transition-all flex items-center gap-2"><i class="fas fa-sync-alt text-blue-500 text-xs"></i> รีเฟรชข้อมูล</button>
+    </div>
+
+    <!-- Main Card Form -->
+    <div class="glass-card p-5 md:p-7 mb-8 transition-all">
+      <div class="flex items-center gap-2 mb-5 border-b border-gray-100 pb-2">
+        <i class="fas fa-pen-alt text-emerald-600 text-lg"></i>
+        <h2 class="font-bold text-gray-800 text-xl">จัดการข้อมูล & อัปโหลดภาพ</h2>
+        <span class="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full ml-2">DRIVE</span>
       </div>
+      
+      <input id="selected_id" type="hidden">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1"><i class="far fa-user text-gray-400 mr-1"></i> ชื่อเรื่อง</label>
+          <input id="name" type="text" placeholder="เช่น รายงานประจำเดือน" class="modern-input w-full p-3 rounded-xl text-gray-800">
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1"><i class="far fa-file-alt text-gray-400 mr-1"></i> รายละเอียด</label>
+          <input id="detail" type="text" placeholder="คำอธิบายเพิ่มเติม" class="modern-input w-full p-3 rounded-xl">
+        </div>
+      </div>
+
+      <!-- File upload area modernized -->
+      <div class="mt-5">
+        <label class="block text-sm font-semibold text-gray-700 mb-2"><i class="fas fa-image text-indigo-400 mr-1"></i> อัปโหลดรูปภาพ (JPEG/PNG)</label>
+        <div id="dropZone" class="file-zone p-4 text-center cursor-pointer transition-all flex flex-col items-center justify-center">
+          <i class="fas fa-cloud-upload-alt text-3xl text-indigo-300 mb-2"></i>
+          <p class="text-sm text-gray-500"><span class="font-medium text-indigo-600">คลิกเพื่อเลือก</span> หรือลากรูปมาวาง</p>
+          <input id="imageFile" type="file" accept="image/*" class="hidden" />
+          <p id="fileName" class="text-xs text-gray-400 mt-2 flex items-center gap-1"><i class="far fa-image"></i> ยังไม่ได้เลือกรูป</p>
+        </div>
+        <!-- preview avatar -->
+        <div id="livePreviewImg" class="mt-3 hidden flex items-center gap-2 p-2 bg-gray-50 rounded-xl w-fit">
+          <i class="fas fa-check-circle text-emerald-500 text-sm"></i>
+          <span class="text-xs text-gray-600" id="previewFileName">-</span>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-3 mt-6">
+        <button id="btnAdd" onclick="createData()" class="btn-gradient-primary text-white px-8 py-2.5 rounded-xl font-semibold shadow-md flex items-center gap-2 transition-all"><i class="fas fa-save text-sm"></i> เพิ่มข้อมูล</button>
+        <button id="btnUpdate" onclick="updateData()" class="btn-gradient-warning text-white px-8 py-2.5 rounded-xl font-semibold shadow-md hidden items-center gap-2 transition-all"><i class="fas fa-edit text-sm"></i> บันทึกการแก้ไข</button>
+        <button onclick="clearForm()" class="btn-outline-neutral text-gray-700 px-5 py-2.5 rounded-xl font-medium flex items-center gap-2"><i class="fas fa-eraser text-sm"></i> ล้างฟอร์ม</button>
+      </div>
+      <div id="statusMsg" class="hidden text-sm py-3 px-4 rounded-xl mt-4 backdrop-blur-sm font-medium transition-all"></div>
     </div>
-    <div class="flex justify-between items-center mb-4">
-      <h3 class="font-bold text-gray-700 text-lg">Data List</h3>
-      <button onclick="readData()" class="text-blue-600 hover:underline text-sm font-medium">Refresh List</button>
-    </div>
-    <div id="statusMsg" class="hidden text-center text-sm py-2 px-4 rounded mb-3"></div>
-    <div id="dataList" class="space-y-3">
-      <p class="text-center text-gray-400 italic">Loading data...</p>
+
+    <!-- Data List Section -->
+    <div class="bg-white/60 rounded-2xl p-1 shadow-inner">
+      <div class="bg-white rounded-2xl p-5 shadow-sm">
+        <div class="flex justify-between items-center mb-5 flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <i class="fas fa-list-ul text-blue-500"></i>
+            <h3 class="font-bold text-gray-800 text-lg">รายการข้อมูลทั้งหมด</h3>
+            <span id="itemCountBadge" class="bg-blue-100 text-blue-700 text-xs font-mono px-2 py-0.5 rounded-full">0 รายการ</span>
+          </div>
+          <div class="text-xs text-gray-400 bg-gray-50 px-3 py-1 rounded-full"><i class="far fa-clock"></i> อัปเดตอัตโนมัติหลังบันทึก</div>
+        </div>
+        <div id="dataList" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[560px] overflow-y-auto pr-1 custom-scroll">
+          <div class="col-span-full flex justify-center py-8">
+            <div class="flex flex-col items-center gap-2 text-gray-400"><i class="fas fa-spinner fa-pulse text-2xl"></i><span>กำลังโหลดข้อมูล...</span></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbwEkG194NoOJ11OQh1npRDd4ISQ3uLcnIjb-8m__4-T683tpjG27FAaHxSdGhGhYCMvwA/exec";
     let base64Image = "";
+    let currentImagePreviewUrl = "";
+
     const $ = id => document.getElementById(id);
-    $("imageFile").addEventListener("change", e => {
+    
+    // Drag & drop modern + click handler
+    const dropZone = document.getElementById("dropZone");
+    const fileInput = $("imageFile");
+    dropZone.addEventListener("click", () => fileInput.click());
+    
+    fileInput.addEventListener("change", e => {
       const file = e.target.files[0];
       if (!file) return;
-      $("fileName").innerText = `Selected: ${file.name}`;
-      const reader = new FileReader();
-      reader.onload = () => (base64Image = reader.result);
-      reader.readAsDataURL(file);
+      processFile(file);
     });
+    
+    // Drag & drop events
+    dropZone.addEventListener("dragover", (e) => { e.preventDefault(); dropZone.classList.add("border-blue-400", "bg-blue-50"); });
+    dropZone.addEventListener("dragleave", () => { dropZone.classList.remove("border-blue-400", "bg-blue-50"); });
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("border-blue-400", "bg-blue-50");
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith("image/")) {
+        processFile(file);
+      } else { showStatus("❌ กรุณาเลือกไฟล์รูปภาพเท่านั้น", false); }
+    });
+    
+    function processFile(file) {
+      if (!file.type.match("image.*")) { showStatus("❌ กรุณาอัปโหลดไฟล์รูปภาพเท่านั้น", false); return; }
+      $("fileName").innerHTML = `<i class="fas fa-check-circle text-green-500"></i> ${file.name} (${(file.size/1024).toFixed(1)} KB)`;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        base64Image = ev.target.result;
+        // show mini preview
+        const previewDiv = $("livePreviewImg");
+        previewDiv.classList.remove("hidden");
+        $("previewFileName").innerHTML = `เตรียมรูป: ${file.name}`;
+      };
+      reader.readAsDataURL(file);
+    }
+    
     function showStatus(msg, isSuccess) {
       const el = $("statusMsg");
       el.textContent = msg;
-      el.className = `text-center text-sm py-2 px-4 rounded mb-3 ${isSuccess ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`;
-      el.classList.remove("hidden");
-      setTimeout(() => el.classList.add("hidden"), 4000);
+      el.classList.remove("hidden", "bg-green-100", "text-green-700", "bg-red-100", "text-red-700", "bg-yellow-100", "text-yellow-700");
+      if (isSuccess) {
+        el.classList.add("bg-green-100", "text-green-800", "border-l-4", "border-green-500");
+      } else {
+        el.classList.add("bg-red-100", "text-red-800", "border-l-4", "border-red-500");
+      }
+      setTimeout(() => el.classList.add("hidden"), 4500);
     }
+    
     async function readData() {
       try {
+        const container = $("dataList");
+        container.innerHTML = `<div class="col-span-full flex justify-center py-8"><div class="flex flex-col items-center gap-2 text-gray-400"><i class="fas fa-spinner fa-pulse text-2xl"></i><span>ดึงข้อมูลล่าสุด...</span></div></div>`;
         const res = await fetch(`${API_URL}?action=read&t=${Date.now()}`);
         const data = await res.json();
-        const list = $("dataList");
-        list.innerHTML = data.length === 0 ? '<p class="text-center text-gray-400">No data found.</p>' : "";
+        $("itemCountBadge").innerText = `${data.length} รายการ`;
+        if (!data.length) {
+          container.innerHTML = `<div class="col-span-full text-center py-10 flex flex-col items-center gap-2 text-gray-400"><i class="far fa-folder-open text-4xl opacity-40"></i><p class="italic">ไม่มีข้อมูลในระบบ</p><button onclick="readData()" class="text-blue-500 text-sm underline mt-1">รีเฟรชอีกครั้ง</button></div>`;
+          return;
+        }
+        container.innerHTML = "";
         data.forEach(item => {
+          const imgSrc = item.Image && item.Image.startsWith("http") ? 
+            item.Image.replace("uc?id=", "thumbnail?id=").replace("&export=download", "&sz=w300") : 
+            (item.Image && typeof item.Image === "string" && itemImageCache(item.Image) ? item.Image : null);
+          let finalImg = imgSrc && imgSrc !== "undefined" ? imgSrc : "https://placehold.co/400x400?text=📷&font=montserrat";
+          
           const card = document.createElement("div");
-          card.className = "flex items-center gap-4 p-3 border rounded bg-white hover:shadow-md transition";
-          const imgSrc = item.Image ? item.Image.replace("uc?id=", "thumbnail?id=").replace("&export=download", "&sz=w400") : "https://placehold.co/60x60?text=No+Img";
-          card.innerHTML = `<img src="${imgSrc}" referrerpolicy="no-referrer" class="w-16 h-16 object-cover rounded shadow-sm border bg-gray-100" onerror="this.src='https://placehold.co/60x60?text=No+Img'"><div class="flex-1 min-w-0"><div class="font-bold text-gray-800">${item.Name}</div><div class="text-sm text-gray-500 truncate">${item.Detail}</div><div class="text-[10px] text-gray-300 mt-1 uppercase font-mono truncate">${item.ID}</div></div><div class="flex flex-col gap-1 shrink-0"><button onclick='editMode(${JSON.stringify(item)})' class="text-xs bg-yellow-100 text-yellow-700 px-3 py-1.5 rounded hover:bg-yellow-200">Edit</button><button onclick="deleteData('${item.ID}')" class="text-xs bg-red-100 text-red-700 px-3 py-1.5 rounded hover:bg-red-200">Del</button></div>`;
-          list.appendChild(card);
+          card.className = "item-card p-4 fade-in flex gap-4 items-start transition-all duration-200";
+          card.innerHTML = `
+            <div class="relative shrink-0">
+              <img src="${finalImg}" referrerpolicy="no-referrer" class="w-20 h-20 rounded-2xl object-cover shadow-sm border-2 border-white bg-gray-50" onerror="this.src='https://placehold.co/400x400?text=🚫+No+Image&font=lato'; this.onerror=null">
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-2 flex-wrap">
+                <h4 class="font-bold text-gray-800 text-base truncate max-w-[150px] md:max-w-[180px]">${escapeHtml(item.Name)}</h4>
+                <span class="bg-gray-100 text-[10px] font-mono px-2 py-0.5 rounded-full text-gray-500 break-all max-w-[100px] truncate">${escapeHtml(item.ID?.slice(0, 8) || 'id')}</span>
+              </div>
+              <p class="text-sm text-gray-500 mt-1 line-clamp-2">${escapeHtml(item.Detail)}</p>
+              <div class="flex gap-2 mt-3">
+                <button onclick='editMode(${JSON.stringify(item).replace(/'/g, "&#39;")})' class="text-xs font-medium bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1"><i class="fas fa-edit text-[11px]"></i> แก้ไข</button>
+                <button onclick="deleteData('${item.ID}')" class="text-xs font-medium bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1"><i class="fas fa-trash-alt text-[11px]"></i> ลบ</button>
+              </div>
+            </div>
+          `;
+          container.appendChild(card);
         });
-      } catch { $("dataList").innerHTML = '<p class="text-center text-red-500">Failed to load data.</p>'; }
+      } catch (err) {
+        console.error(err);
+        $("dataList").innerHTML = `<div class="col-span-full text-center py-10 text-red-500"><i class="fas fa-exclamation-triangle text-2xl mb-2 block"></i> โหลดข้อมูลล้มเหลว<br><span class="text-xs">ตรวจสอบการเชื่อมต่อ API หรือ CORS</span></div>`;
+      }
     }
+    
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+    function itemImageCache(img) { return img && (img.startsWith('data:') || img.startsWith('http')); }
+    
     function editMode(item) {
-      $("selected_id").value = item.ID; $("name").value = item.Name; $("detail").value = item.Detail; base64Image = item.Image;
-      $("btnUpdate").classList.remove("hidden"); $("btnAdd").classList.add("hidden");
-      $("fileName").innerText = "Current image kept unless new file chosen";
+      $("selected_id").value = item.ID;
+      $("name").value = item.Name || "";
+      $("detail").value = item.Detail || "";
+      // keep the old image if new not selected logic: base64Image is not overwritten unless user selects new file.
+      // But we show user that current image is kept.
+      if (item.Image && typeof item.Image === "string" && item.Image.startsWith("http")) {
+        base64Image = item.Image;   // store existing drive link (for update we send same link)
+      } else if (item.Image && !item.Image.startsWith("data:")) {
+        base64Image = item.Image;
+      } else if (!item.Image) base64Image = "";
+      $("fileName").innerHTML = `<i class="fas fa-info-circle text-blue-400"></i> รูปภาพปัจจุบันถูกเก็บไว้ (เลือกไฟล์ใหม่เพื่อเปลี่ยน)`;
+      $("livePreviewImg").classList.remove("hidden");
+      $("previewFileName").innerHTML = `🖼️ ใช้รูปเดิม (ID: ${item.ID?.slice(0,6)})`;
+      $("btnUpdate").classList.remove("hidden");
+      $("btnAdd").classList.add("hidden");
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
+    
     async function createData() {
       if (!validateForm()) return;
-      await sendRequest({ action: "create", name: $("name").value, detail: $("detail").value, image: base64Image });
+      await sendRequest({ action: "create", name: $("name").value.trim(), detail: $("detail").value.trim(), image: base64Image });
     }
     async function updateData() {
       if (!validateForm()) return;
-      await sendRequest({ action: "update", id: $("selected_id").value, name: $("name").value, detail: $("detail").value, image: base64Image });
+      if (!$("selected_id").value) { showStatus("ไม่พบ ID สำหรับอัปเดต", false); return; }
+      await sendRequest({ action: "update", id: $("selected_id").value, name: $("name").value.trim(), detail: $("detail").value.trim(), image: base64Image });
     }
-    async function deleteData(id) { if (!confirm("Are you sure you want to delete this item?")) return; await sendRequest({ action: "delete", id }); }
+    async function deleteData(id) {
+      if (!confirm("⚠️ ลบรายการนี้แล้วไม่สามารถกู้คืนได้! ยืนยันการลบ?")) return;
+      await sendRequest({ action: "delete", id });
+    }
+    
     async function sendRequest(payload) {
-      showStatus("⏳ กำลังดำเนินการ...", true); setFormDisabled(true);
+      showStatus("🔁 กำลังประมวลผล กรุณารอสักครู่...", true);
+      setFormDisabled(true);
       try {
-        const res = await fetch(API_URL, { method: "POST", redirect: "follow", body: JSON.stringify(payload) });
-        const result = await res.json();
-        showStatus(`${result.success ? "✅" : "❌"} ${result.message}`, result.success);
-        if (result.success) { clearForm(); setTimeout(readData, 3000); }
-      } catch { showStatus("✅ ส่งข้อมูลแล้ว กำลัง Refresh...", true); clearForm(); setTimeout(readData, 3000); }
-      finally { setFormDisabled(false); }
+        const response = await fetch(API_URL, { 
+          method: "POST", 
+          mode: "cors",
+          redirect: "follow",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload) 
+        });
+        let result = { success: false, message: "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์" };
+        try { result = await response.json(); } catch(e) { result = { success: true, message: "ส่งข้อมูลสำเร็จ (เซิร์ฟเวอร์ตอบกลับไม่เป็น JSON)" }; }
+        showStatus(`${result.success ? "✅ สำเร็จ" : "❌ ล้มเหลว"} : ${result.message || "ดำเนินการเรียบร้อย"}`, result.success);
+        if (result.success) {
+          clearForm();
+          setTimeout(() => { readData(); }, 1500);
+        } else {
+          setFormDisabled(false);
+        }
+      } catch (err) {
+        console.warn(err);
+        showStatus("✅ ส่งข้อมูลเรียบร้อย กำลังโหลดข้อมูลล่าสุด (อาจมีการหน่วงเวลา GAS)", true);
+        clearForm();
+        setTimeout(() => readData(), 2000);
+        setFormDisabled(false);
+      } 
+      finally { setTimeout(() => setFormDisabled(false), 2000); }
     }
-    function setFormDisabled(disabled) { ["btnAdd", "btnUpdate"].forEach(id => { const el = $(id); if (el) el.disabled = disabled; }); }
-    function validateForm() { if (!$("name").value || !$("detail").value) { alert("Please fill in Name and Detail."); return false; } return true; }
+    
+    function setFormDisabled(disabled) {
+      const addBtn = $("btnAdd"); const updBtn = $("btnUpdate");
+      if (addBtn) addBtn.disabled = disabled;
+      if (updBtn) updBtn.disabled = disabled;
+      if (disabled) { addBtn?.classList.add("opacity-50"); updBtn?.classList.add("opacity-50"); } 
+      else { addBtn?.classList.remove("opacity-50"); updBtn?.classList.remove("opacity-50"); }
+    }
+    
+    function validateForm() {
+      const nameVal = $("name").value.trim();
+      const detVal = $("detail").value.trim();
+      if (!nameVal || !detVal) { showStatus("⚠️ กรุณากรอกทั้งชื่อ และรายละเอียด", false); return false; }
+      return true;
+    }
+    
     function clearForm() {
-      $("selected_id").value = ""; $("name").value = ""; $("detail").value = ""; $("imageFile").value = ""; $("fileName").innerText = "";
-      $("btnUpdate").classList.add("hidden"); $("btnAdd").classList.remove("hidden"); base64Image = "";
+      $("selected_id").value = "";
+      $("name").value = "";
+      $("detail").value = "";
+      $("imageFile").value = "";
+      $("fileName").innerHTML = `<i class="far fa-image"></i> ยังไม่ได้เลือกรูป`;
+      $("livePreviewImg").classList.add("hidden");
+      $("previewFileName").innerHTML = "";
+      base64Image = "";
+      if (!$("btnUpdate").classList.contains("hidden")) {
+        $("btnUpdate").classList.add("hidden");
+        $("btnAdd").classList.remove("hidden");
+      }
     }
+    
+    // initial load
     readData();
   </script>
 </body>
